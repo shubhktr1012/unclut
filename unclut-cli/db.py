@@ -1,6 +1,9 @@
 import os
 from datetime import datetime, UTC
 import logging
+from dotenv import load_dotenv # Added this line
+
+load_dotenv() # Added this line to load environment variables from .env
 
 try:
 	from pymongo import MongoClient
