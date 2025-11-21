@@ -9,7 +9,7 @@ export default function Home() {
     setLoading(true);
     try {
       // This calls your Python Backend
-      const res = await fetch("http://127.0.0.1:8000/scan?max_senders=10");
+      const res = await fetch("https://unclut-backend.onrender.com/scan?max_senders=10");
       const data = await res.json();
       setEmails(data.emails); // Assuming your backend returns { emails: [...] }
     } catch (error) {
