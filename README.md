@@ -1,130 +1,119 @@
-# Unclut - Gmail Unsubscriber & Cleaner
+# Unclut.ai - Gmail Cleaner & Unsubscriber
 
-Unclut is a powerful command-line tool designed to help you reclaim your Gmail inbox. It intelligently scans for promotional emails, allows you to select senders, and then automates the process of unsubscribing from them and bulk-deleting their emails.
+Unclut.ai is a comprehensive tool suite designed to help you reclaim your Gmail inbox. It intelligently scans for promotional emails, allows you to select senders, and automates the process of unsubscribing and bulk-deleting unwanted emails.
 
-![Screenshot of the Unclut CLI menu in action](assets/unclut-ai.png)
-*(Feel free to replace the image URL above with a screenshot of the tool)*
+![Unclut AI](assets/unclut-ai.png)
 
-## ✨ Features
+## 📂 Project Structure
 
--   **Interactive & Easy to Use**: A simple, clean command-line menu to guide you.
--   **Intelligent Email Discovery**: Automatically fetches and lists unique senders from your promotional emails.
--   **Flexible Actions**: Choose to:
-    -   Unsubscribe from selected senders.
-    -   Bulk-delete all emails from selected senders.
-    -   Do both at once for a total cleanup.
--   **Automated Unsubscription**: Intelligently processes unsubscribe links, including those requiring form submissions.
--   **Safe Dry Run Mode**: Preview the actions the tool will take without making any actual changes to your inbox.
--   **Activity Tracking (Optional)**: Connect to a MongoDB database to keep a record of your cleanup activity.
+This is a monorepo containing the following components:
 
-## ⚙️ How It Works
+-   **`backend/`**: A FastAPI-based backend service that handles Gmail API interactions, email scanning, and unsubscription logic.
+-   **`frontend/`**: A Next.js web application serving as the user interface for the tool.
+-   **`chrome-extension/`**: A browser extension for inline inbox management (MVP).
+-   **`unclut-cli/`**: The original command-line interface tool for batch processing.
 
-The tool uses the official Gmail API to securely access your account.
-
-1.  **Authentication**: On first use, it authenticates via Google's OAuth 2.0 flow, storing a token locally and securely for future sessions.
-2.  **Scanning**: It scans your inbox for emails labeled as promotions, focusing on older emails to identify long-term clutter.
-3.  **Sender Selection**: It presents you with a numbered list of unique senders from the promotional emails it found.
-4.  **Link Extraction**: For the senders you select, it finds the most recent email and extracts the unsubscribe link from either the `List-Unsubscribe` header or the email's body.
-5.  **Action Execution**:
-    -   **Unsubscribe**: It visits the unsubscribe link, attempts to confirm the action, and can even handle basic confirmation forms.
-    -   **Delete**: It efficiently finds all emails from the selected sender and performs a batch deletion.
+---
 
 ## 🚀 Getting Started
-
-Follow these steps to get the Unclut CLI running on your local machine.
 
 ### Prerequisites
 
 -   Python 3.8+
--   `pip` (Python package installer)
+-   Node.js 18+
+-   Google Cloud Project with Gmail API enabled
 
-### 1. Set Up Google Cloud Project & Gmail API
+### 1. Backend Setup (FastAPI)
 
-To use the Gmail API, you need to configure a project in the Google Cloud Console.
+The backend powers the web app and handles all API logic.
 
-1.  **Create a Project**: Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
-2.  **Enable the Gmail API**: In your new project, go to "APIs & Services" > "Library", search for "Gmail API", and enable it.
-3.  **Configure OAuth Consent Screen**: Go to "APIs & Services" > "OAuth consent screen".
-    -   Choose **External** user type.
-    -   Fill in the required app information (app name, user support email, developer contact).
-    -   On the "Scopes" page, you don't need to add any scopes.
-    -   On the "Test users" page, add the Google account email you want to clean up.
-4.  **Create Credentials**:
-    -   Go to "APIs & Services" > "Credentials".
-    -   Click "Create Credentials" > "OAuth client ID".
-    -   Select **Desktop app** as the application type.
-    -   Give it a name (e.g., "Unclut CLI").
-    -   Click "Create". A modal will appear with your Client ID and Secret. Click **Download JSON**.
-5.  **Add Credentials to Project**:
-    -   Rename the downloaded file to `credentials.json`.
-    -   Place this file inside the `unclut-cli/` directory.
+1.  Navigate to the backend directory:
+    ```bash
+    cd backend
+    ```
+2.  Install dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+3.  **Authentication Setup**:
+    -   Place your `credentials.json` from Google Cloud Console in the `backend/` folder.
+    -   Run the app locally once to generate `token.pickle` (browser login required):
+        ```bash
+        uvicorn main:app --reload
+        ```
+    -   **Production**: Set `GOOGLE_REFRESH_TOKEN`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET` environment variables.
 
-### 2. Clone the Repository
+4.  Run the server:
+    ```bash
+    uvicorn main:app --reload
+    ```
+    The API will be available at `http://127.0.0.1:8000`.
 
-```bash
-git clone <your-repository-url>
-cd unclut
-```
+### 2. Frontend Setup (Next.js)
 
-### 3. Install Dependencies
+The frontend provides a modern web interface for scanning and cleaning your inbox.
 
-Install the required Python packages using the `requirements.txt` file.
+1.  Navigate to the frontend directory:
+    ```bash
+    cd frontend
+    ```
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Run the development server:
+    ```bash
+    npm run dev
+    ```
+    Open [http://localhost:3000](http://localhost:3000) to see the app.
 
-```bash
-pip install -r unclut-cli/requirements.txt
-```
+### 3. CLI Tool (Legacy)
 
-### 4. Configure Environment Variables
+For those who prefer the terminal.
 
-The tool is configured using a `.env` file.
-
-1.  Create a file named `.env` inside the `unclut-cli/` directory.
-2.  Copy and paste the following content into it, adjusting the values as needed.
-
-```env
-# The maximum number of unique senders to display in the menu.
-MAX_SENDERS=50
-
-# The maximum number of recent emails to scan to find senders.
-MAX_EMAILS_TO_SCAN=200
-
-# Set to "true" to run in dry run mode (no actual unsubscribing or deleting).
-# Highly recommended for the first run!
-DRY_RUN=true
-
-# --- Optional: MongoDB for Activity Tracking ---
-# Your MongoDB connection string. If left blank, database logging is disabled.
-# MONGODB_URI="mongodb+srv://..."
-# MONGODB_DB="unclut_prod"
-# MONGODB_COLLECTION="users"
-```
-
-## ▶️ Usage
-
-1.  Navigate to the command-line tool's directory:
+1.  Navigate to the CLI directory:
     ```bash
     cd unclut-cli
     ```
-2.  Run the main script:
+2.  Install dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+3.  Run the tool:
     ```bash
     python main.py
     ```
-3.  **First-time Authentication**: The first time you run it, a browser window will open asking you to log in to your Google account and grant the app permission. After you approve, a `token.pickle` file will be saved in the directory for future use.
-4.  **Follow the Menu**: Once authenticated, the main menu will appear. Just follow the on-screen prompts to start cleaning your inbox!
 
-## 🔧 Configuration
+### 4. Chrome Extension
 
-You can customize the tool's behavior by editing the `unclut-cli/.env` file:
+1.  Open Chrome and go to `chrome://extensions/`.
+2.  Enable **Developer mode**.
+3.  Click **Load unpacked** and select the `chrome-extension/` folder.
 
--   `MAX_SENDERS`: Controls how many sender options you get in the selection list.
--   `MAX_EMAILS_TO_SCAN`: A higher number means a more thorough scan for promotional senders, but it may take longer.
--   `DRY_RUN`: Set to `true` to see what the script *would* do without it actually doing anything. Set to `false` to perform the real actions.
--   `MONGODB_URI`: If you want to log activity, provide your full MongoDB connection string here. If this is empty, no database connection will be attempted.
+---
+
+## ☁️ Deployment
+
+### Backend (Render)
+The backend is configured for deployment on Render.
+-   **Build Command**: `pip install -r requirements.txt`
+-   **Start Command**: `uvicorn main:app --host 0.0.0.0 --port 10000`
+-   **Environment Variables**: Ensure `GOOGLE_REFRESH_TOKEN`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET` are set.
+
+### Frontend (Vercel)
+The frontend is optimized for Vercel.
+-   Connect your repository to Vercel.
+-   It will automatically detect the Next.js project in `frontend/`.
+
+---
+
+## ✨ Features
+
+-   **Smart Scanning**: Identifies promotional emails older than 14 days.
+-   **Bulk Actions**: Unsubscribe and delete emails in one go.
+-   **Modern UI**: Clean web interface for easy management.
+-   **Secure**: Uses official Gmail API with OAuth 2.0.
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a pull request or open an issue for any bugs or feature requests.
-
-## 📄 License
-
-This project is not licensed. Please add a license file.
+Contributions are welcome! Please feel free to submit a pull request or open an issue.
