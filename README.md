@@ -1,119 +1,109 @@
-# Unclut.ai - Gmail Cleaner & Unsubscriber
+# unClut.ai | Full Stack AI Email Assistant
 
-Unclut.ai is a comprehensive tool suite designed to help you reclaim your Gmail inbox. It intelligently scans for promotional emails, allows you to select senders, and automates the process of unsubscribing and bulk-deleting unwanted emails.
+![unClut.ai Banner](assets/unclut-ai.png)
 
-![Unclut AI](assets/unclut-ai.png)
+### A production-ready web application that helps users declutter their Gmail inboxes using AI-driven scanning and smart unsubscribe logic.
+
+<div align="center">
+
+  [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+  [![FastAPI](https://img.shields.io/badge/FastAPI-0.104-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+  [![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python)](https://www.python.org/)
+  [![Tailwind](https://img.shields.io/badge/Tailwind_CSS-3.0-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+
+  <h3>
+    <a href="https://unclut.vercel.app">🔴 Live Demo (Vercel)</a>
+    <span> | </span>
+    <a href="https://unclut-backend.onrender.com/docs">API Docs</a>
+    <span> | </span>
+    <a href="https://github.com/shubhktr1012/unclut">View Code</a>
+  </h3>
+</div>
+
+---
+
+## 🏗 System Architecture
+
+This project utilizes a **Monorepo Architecture** to manage a Hybrid Stack application. It demonstrates secure cross-origin communication between a modern Node.js frontend and a robust Python backend.
+
+| Component | Tech Stack | Deployment | Live URL |
+|-----------|------------|------------|----------|
+| **Frontend** | Next.js 14 (App Router), TypeScript | **Vercel** | [unclut.vercel.app](https://unclut.vercel.app) |
+| **Backend** | Python FastAPI, Uvicorn | **Render** | [unclut-backend.onrender.com](https://unclut-backend.onrender.com) |
+| **Auth** | OAuth 2.0 | - | Secure Token Management & Scope handling. |
+
+---
+
+## 🚀 Key Features
+
+* **Hybrid Connectivity:** Seamless integration between Next.js (Frontend) and Python (Backend) using REST endpoints.
+* **Smart Unsubscribe Engine:** Unlike standard tools that just delete emails, this engine parses `List-Unsubscribe` headers and scrapes HTML bodies to find "Opt-Out" links programmatically.
+* **Real-Time Scanning:** Fetches and categorizes promotional emails live from the user's Gmail account.
+* **Secure CORS Configuration:** Configured middleware to allow secure communication between Vercel (Frontend) and Render (Backend).
+
+---
 
 ## 📂 Project Structure
 
-This is a monorepo containing the following components:
+This monorepo contains the following packages:
 
--   **`backend/`**: A FastAPI-based backend service that handles Gmail API interactions, email scanning, and unsubscription logic.
--   **`frontend/`**: A Next.js web application serving as the user interface for the tool.
--   **`chrome-extension/`**: A browser extension for inline inbox management (MVP).
--   **`unclut-cli/`**: The original command-line interface tool for batch processing.
+-   `frontend/`: The Next.js client-side application.
+-   `backend/`: The FastAPI server and Python logic.
+-   `chrome-extension/`: *(Legacy)* An MVP browser extension for inline management.
+-   `unclut-cli/`: *(Legacy)* The original command-line interface tool.
 
 ---
 
-## 🚀 Getting Started
+## 🛠️ Getting Started Locally
 
 ### Prerequisites
-
--   Python 3.8+
 -   Node.js 18+
--   Google Cloud Project with Gmail API enabled
+-   Python 3.9+
+-   Google Cloud Console Credentials (`credentials.json`)
 
-### 1. Backend Setup (FastAPI)
+### 1. Backend Setup (Python)
 
-The backend powers the web app and handles all API logic.
+```bash
+cd backend
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
 
-1.  Navigate to the backend directory:
-    ```bash
-    cd backend
-    ```
-2.  Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-3.  **Authentication Setup**:
-    -   Place your `credentials.json` from Google Cloud Console in the `backend/` folder.
-    -   Run the app locally once to generate `token.pickle` (browser login required):
-        ```bash
-        uvicorn main:app --reload
-        ```
-    -   **Production**: Set `GOOGLE_REFRESH_TOKEN`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET` environment variables.
+# Install dependencies
+pip install -r requirements.txt
 
-4.  Run the server:
-    ```bash
-    uvicorn main:app --reload
-    ```
-    The API will be available at `http://127.0.0.1:8000`.
+# Run Server
+uvicorn main:app --reload
+```
+
+The API will be available at http://127.0.0.1:8000
 
 ### 2. Frontend Setup (Next.js)
+```bash
+cd frontend
+# Install dependencies
+npm install
 
-The frontend provides a modern web interface for scanning and cleaning your inbox.
+# Run Development Server
+npm run dev
+```
 
-1.  Navigate to the frontend directory:
-    ```bash
-    cd frontend
-    ```
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Run the development server:
-    ```bash
-    npm run dev
-    ```
-    Open [http://localhost:3000](http://localhost:3000) to see the app.
+The App will be available at http://localhost:3000
 
-### 3. CLI Tool (Legacy)
+## 🔧 Environment Variables
 
-For those who prefer the terminal.
-
-1.  Navigate to the CLI directory:
-    ```bash
-    cd unclut-cli
-    ```
-2.  Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-3.  Run the tool:
-    ```bash
-    python main.py
-    ```
-
-### 4. Chrome Extension
-
-1.  Open Chrome and go to `chrome://extensions/`.
-2.  Enable **Developer mode**.
-3.  Click **Load unpacked** and select the `chrome-extension/` folder.
-
----
-
-## ☁️ Deployment
-
-### Backend (Render)
-The backend is configured for deployment on Render.
--   **Build Command**: `pip install -r requirements.txt`
--   **Start Command**: `uvicorn main:app --host 0.0.0.0 --port 10000`
--   **Environment Variables**: Ensure `GOOGLE_REFRESH_TOKEN`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET` are set.
-
-### Frontend (Vercel)
-The frontend is optimized for Vercel.
--   Connect your repository to Vercel.
--   It will automatically detect the Next.js project in `frontend/`.
-
----
-
-## ✨ Features
-
--   **Smart Scanning**: Identifies promotional emails older than 14 days.
--   **Bulk Actions**: Unsubscribe and delete emails in one go.
--   **Modern UI**: Clean web interface for easy management.
--   **Secure**: Uses official Gmail API with OAuth 2.0.
+To run this project, you will need to set up the following environment variables in your .env file or Deployment settings:
+`GOOGLE_CLIENT_ID` `GOOGLE_CLIENT_SECRET` `GOOGLE_REFRESH_TOKEN`
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a pull request or open an issue.
+Contributions are welcome! This project follows a standard Feature Branch workflow:
+1. Create a branch (`git checkout -b feature/AmazingFeature`)
+2. Commit your changes (`git commit -m 'feat: Add some AmazingFeature'`)
+3. Push to the branch (`git push origin feature/AmazingFeature`)
+4. Open a Pull Request
+
+## 📜 License
+
+Distributed under the MIT License. See LICENSE for more information.
