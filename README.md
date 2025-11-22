@@ -17,7 +17,7 @@
     <span> | </span>
     <a href="https://unclut-backend.onrender.com/docs">API Docs</a>
     <span> | </span>
-    <a href="https://github.com/YOUR_GITHUB_USERNAME/unclut-ai">View Code</a>
+    <a href="https://github.com/shubhktr1012/unclut">View Code</a>
   </h3>
 </div>
 
@@ -26,11 +26,6 @@
 ## 🏗 System Architecture
 
 This project utilizes a **Monorepo Architecture** to manage a Hybrid Stack application. It demonstrates secure cross-origin communication between a modern Node.js frontend and a robust Python backend.
-
-
-
-[Image of full stack web application architecture]
-
 
 | Component | Tech Stack | Deployment | Live URL |
 |-----------|------------|------------|----------|
@@ -56,6 +51,7 @@ This monorepo contains the following packages:
 -   `frontend/`: The Next.js client-side application.
 -   `backend/`: The FastAPI server and Python logic.
 -   `chrome-extension/`: *(Legacy)* An MVP browser extension for inline management.
+-   `unclut-cli/`: *(Legacy)* The original command-line interface tool.
 
 ---
 
@@ -84,7 +80,7 @@ uvicorn main:app --reload
 The API will be available at http://127.0.0.1:8000
 
 ### 2. Frontend Setup (Next.js)
-```
+```bash
 cd frontend
 # Install dependencies
 npm install
@@ -98,25 +94,16 @@ The App will be available at http://localhost:3000
 ## 🔧 Environment Variables
 
 To run this project, you will need to set up the following environment variables in your .env file or Deployment settings:
-```GOOGLE_CLIENT_ID``` ```GOOGLE_CLIENT_SECRET``` ```GOOGLE_REFRESH_TOKEN```
+`GOOGLE_CLIENT_ID` `GOOGLE_CLIENT_SECRET` `GOOGLE_REFRESH_TOKEN`
 
 ## 🤝 Contributing
 
 Contributions are welcome! This project follows a standard Feature Branch workflow:
-1. Create a branch (```git checkout -b feature/AmazingFeature```)
-2. Commit your changes (```git commit -m 'feat: Add some AmazingFeature'```)
-3. Push to the branch (```git push origin feature/AmazingFeature```)
+1. Create a branch (`git checkout -b feature/AmazingFeature`)
+2. Commit your changes (`git commit -m 'feat: Add some AmazingFeature'`)
+3. Push to the branch (`git push origin feature/AmazingFeature`)
 4. Open a Pull Request
 
 ## 📜 License
 
 Distributed under the MIT License. See LICENSE for more information.
-
-### ⚡ Action:
-1.  **Paste** this into your `README.md`.
-2.  **Change** `YOUR_GITHUB_USERNAME` (near the top) to your actual username.
-3.  **Commit & Push.**
-
-Once you push this, you have officially **Finished Pillar 1** of the Unfuck Protocol. You exist. You are visible. You are hireable.
-
-**Are you ready to send the first "Trojan Horse" application?**
