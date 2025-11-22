@@ -1,0 +1,12 @@
+fastapi==0.117.1
+uvicorn==0.37.0
+google-api-python-client==2.181.0
+google-auth-httplib2==0.2.0
+google-auth-oauthlib==1.2.2
+python-dotenv==1.0.1
+pydantic==2.10.6
+requests==2.32.3
+beautifulsoup4==4.12.3
+termcolor==2.5.0
+python-multipart==0.0.20
+email-validator==2.2.0
