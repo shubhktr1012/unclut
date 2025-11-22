@@ -10,9 +10,15 @@ from email_fetcher import fetch_promotional_emails
 
 app = FastAPI()
 
+origins = [
+    "http://localhost:3000",
+    "https:unclut.vercel.app",
+    "https://unclut.vercel.app/"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
