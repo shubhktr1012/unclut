@@ -33,16 +33,37 @@ def get_flow(request: Request):
     # if SSL termination happens at the load balancer.
     # Starlette's request.url_for should handle this if configured with ProxyHeadersMiddleware.
     
+    # Determine redirect URI
     redirect_uri = str(request.url_for('auth_callback'))
     # Ensure HTTPS in production if not automatic
     if "onrender.com" in redirect_uri and redirect_uri.startswith("http://"):
         redirect_uri = redirect_uri.replace("http://", "https://", 1)
         
-    return Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE,
-        scopes=SCOPES,
-        redirect_uri=redirect_uri
-    )
+    # Check for credentials in env var first (Production)
+    creds_json = os.getenv("GOOGLE_CREDENTIALS_JSON")
+    
+    if creds_json:
+        # Load from environment variable string
+        try:
+             client_config = json.loads(creds_json)
+             return Flow.from_client_config(
+                client_config,
+                scopes=SCOPES,
+                redirect_uri=redirect_uri
+            )
+        except json.JSONDecodeError:
+            print("ERROR: Invalid JSON in GOOGLE_CREDENTIALS_JSON")
+            # Fallthrough might be dangerous if file doesn't exist, but let's let it crash on file access
+            
+    # Fallback to local file (Development)
+    if os.path.exists(CLIENT_SECRETS_FILE):
+        return Flow.from_client_secrets_file(
+            CLIENT_SECRETS_FILE,
+            scopes=SCOPES,
+            redirect_uri=redirect_uri
+        )
+    else:
+        raise FileNotFoundError(f"Credentials not found. Set GOOGLE_CREDENTIALS_JSON or provide {CLIENT_SECRETS_FILE}")
 
 @router.get("/login")
 def login(request: Request):
