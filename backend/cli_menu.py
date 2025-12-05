@@ -5,7 +5,7 @@ from typing import Callable, List, Dict, Any, Tuple, Optional
 from unsub_process import process_unsubscribe_links
 from email_fetcher import delete_emails_from_sender, fetch_promotional_emails, preview_emails_with_sequence
 from unsubscribe_list import extract_unsubscribe_links
-from setup_gmail_service import create_service
+from setup_gmail_service.py.deprecated import create_service
 from config import config as app_config
 from db import record_activity
 

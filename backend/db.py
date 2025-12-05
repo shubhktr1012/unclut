@@ -40,6 +40,8 @@ def record_activity(user_email: str, unsub_delta: int = 0, deleted_delta: int = 
 	if not user_email or (unsub_delta == 0 and deleted_delta == 0):
 		return
 	coll = _get_collection()
+	if coll is None:
+		return
 	now = datetime.now(UTC)
 	update = {
 		"$setOnInsert": {
@@ -62,3 +64,51 @@ def record_activity(user_email: str, unsub_delta: int = 0, deleted_delta: int = 
 			logging.info(f"Activity record operation for {user_email} completed with no changes (dry run or no new activity).")
 	except Exception as e:
 		logging.error(f"Failed to record activity for {user_email} in MongoDB: {e}")
+
+def save_user(user_info: dict, credentials: dict) -> bool:
+    """
+    Save user info and credentials to MongoDB.
+    """
+    if not user_info.get('email'):
+        return False
+        
+    coll = _get_collection()
+    if coll is None:
+        return False
+        
+    email = user_info['email']
+    now = datetime.now(UTC)
+    
+    # Prepare the update document
+    update_data = {
+        "$set": {
+            "email": email,
+            "name": user_info.get('name'),
+            "picture": user_info.get('picture'),
+            "updatedAt": now,
+            # Store credentials securely
+            "tokens": credentials # In a real app, encrypt this!
+        },
+        "$setOnInsert": {
+            "createdAt": now,
+            "unsubs_count": 0,
+            "deleted_count": 0
+        }
+    }
+    
+    try:
+        coll.update_one({"_id": email}, update_data, upsert=True)
+        logging.info(f"User {email} saved/updated in database.")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to save user {email}: {e}")
+        return False
+
+def get_user(email: str) -> dict:
+    """
+    Retrieve user by email.
+    """
+    coll = _get_collection()
+    if coll is None:
+        return None
+    return coll.find_one({"_id": email})

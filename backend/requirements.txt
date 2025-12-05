@@ -10,3 +10,4 @@ beautifulsoup4==4.12.3
 termcolor==2.5.0
 python-multipart==0.0.20
 email-validator==2.2.0
+itsdangerous==2.1.2

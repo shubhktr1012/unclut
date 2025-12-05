@@ -11,8 +11,20 @@ export default function Home() {
   const scanInbox = async () => {
     setLoading(true);
     try {
-      // This calls your Python Backend
-      const res = await fetch("https://unclut-backend.onrender.com/scan?max_senders=10");
+      // Use localhost for development, or prod url
+      const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+      const API_BASE_URL = isLocal ? 'http://127.0.0.1:8000' : 'https://unclut-backend.onrender.com';
+
+      const res = await fetch(`${API_BASE_URL}/scan?max_senders=10`, {
+        // We must include credentials (cookies) for the session to work!
+        credentials: 'include'
+      });
+
+      if (res.status === 401) {
+        alert("Please sign in first!");
+        return;
+      }
+
       const data = await res.json();
       setEmails(data.emails);
     } catch (error) {
