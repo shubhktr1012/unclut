@@ -1,97 +1,75 @@
 # Project Context: Unclut.ai
 
 ## 1. Overview
-**Unclut.ai** is a tool designed to help users clean their Gmail inboxes by identifying promotional emails, unsubscribing from mailing lists, and bulk-deleting unwanted emails. The project aims to reclaim inbox space and reduce digital clutter.
+**Unclut.ai** is a full-stack application designed to help users clean their Gmail inboxes. It identifies promotional emails, aggregates them by sender, and allows users to bulk-unsubscribe and delete unwanted emails.
 
-It currently consists of two main components:
-1.  **Unclut CLI**: A robust Python-based command-line tool for batch processing.
-2.  **Chrome Extension**: A browser extension for inline inbox management (currently in MVP phase).
+The project has evolved from a simple CLI tool into a modern web application with a **Hybrid Stack Architecture**.
 
 ## 2. Architecture
-The project is split into two distinct directories:
--   `unclut-cli/`: Contains the Python application logic, interacting directly with Gmail API.
--   `chrome-extension/`: Contains the Javascript/HTML/CSS for the browser extension, interacting with the Gmail DOM and API.
+The project uses a Monorepo structure with three main components:
 
-Both components rely on the **Gmail API** and **OAuth 2.0** for user authentication and data access.
+1.  **Frontend (`/frontend`)**: A modern web interface built with **Next.js 14+** (App Router).
+2.  **Backend (`/backend`)**: A robust API built with **FastAPI** (Python) that handles Gmail API interactions.
+3.  **Legacy Extension (`/legacy-extension`)**: The original Chrome Extension MVP (currently in maintenance mode).
 
-## 3. Component: Unclut CLI (`unclut-cli/`)
+### Data Flow
+1.  **User** interacts with the Next.js Frontend.
+2.  **Frontend** authenticates via OAuth 2.0 and requests data (emails, stats) from the Backend.
+3.  **Backend** communicates with the **Gmail API** using the user's credentials to fetch messages and perform actions (trash, remove from lists).
 
-### Purpose
-To provide a powerful, batch-oriented tool for deep cleaning the inbox. It scans for older promotional emails, aggregates them by sender, and allows the user to take bulk actions.
+---
 
-### Tech Stack
--   **Language**: Python 3.8+
--   **API**: Google Gmail API (via `google-api-python-client`)
--   **Auth**: OAuth 2.0 (via `google-auth-oauthlib`)
--   **HTML Parsing**: `BeautifulSoup4`
--   **HTTP Requests**: `requests` library
--   **Database**: MongoDB (Optional, for activity logging)
-
-### Key Workflows & Implementation
-
-#### 1. Authentication (`setup_gmail_service.py`)
--   Uses `credentials.json` (OAuth client ID) to authenticate.
--   Stores user tokens locally in `token.pickle` for persistent sessions.
--   Scopes: `https://www.googleapis.com/auth/gmail.modify`.
-
-#### 2. Scanning & Discovery (`email_fetcher.py`)
--   **Query**: Scans for emails matching `category:promotions older_than:14d -category:updates -category:social -category:forums`.
--   **Optimization**: Fetches message metadata (ID, ThreadID, Headers) first to minimize data transfer.
--   **Aggregation**: Groups emails by unique sender (extracted from `From` header).
-
-#### 3. Unsubscribe Logic (`extract_unsubscribe.py`, `unsub_process.py`)
--   **Link Extraction**:
-    -   Parses the `List-Unsubscribe` header.
-    -   Scans email body (HTML) for keywords like "unsubscribe", "preferences", "opt-out".
-    -   Handles `mailto:` links.
--   **Action Execution**:
-    -   **GET Requests**: Visits the extracted link.
-    -   **SendGrid Support**: Specifically handles SendGrid links which often require POST requests.
-    -   **Form Submission**: If a simple visit doesn't confirm unsubscription, it parses the page for forms (looking for "confirm", "submit" buttons) and attempts to submit them.
-    -   **Verification**: Checks response text for success keywords ("successfully unsubscribed", "updated").
-
-#### 4. Deletion Logic (`email_fetcher.py`)
--   Uses `users.messages.batchDelete` endpoint to delete emails in chunks of 1000 (API limit).
-
-#### 5. User Interface (`cli_menu.py`)
--   Interactive terminal menu using `input()` loop.
--   Displays numbered list of senders.
--   Supports "Dry Run" mode to preview actions without execution.
-
-## 4. Component: Chrome Extension (`chrome-extension/`)
-
-### Purpose
-To provide a seamless, "native" experience within the Gmail web interface, allowing users to unsubscribe/delete directly from the email list view.
+## 3. Component: Frontend (`/frontend`)
+**Purpose**: The primary user interface for Unclut.ai.
 
 ### Tech Stack
--   **Platform**: Chrome Extension (Manifest V3)
--   **Core**: JavaScript (Vanilla), HTML, CSS
+-   **Framework**: Next.js 16 (React 19)
+-   **Language**: TypeScript
+-   **Styling**: Tailwind CSS
+-   **State Management**: React Hooks
 
-### Implementation Details
+### Key Features
+-   **Landing Page**: Introductory content and "Get Started" flow.
+-   **Auth Flow**: Handles Google OAuth redirection and token exchange.
+-   **Dashboard**: Displays aggregated email stats and allows user control (planned/in-progress).
 
-#### 1. Content Script (`contentScript.js`)
--   **Injection**: Injects a "⸸" button next to sender names in the Gmail list view (`tr[role="row"]`).
--   **SPA Handling**: Uses `MutationObserver` and hooks into `history.pushState`/`replaceState` to handle Gmail's Single Page Application navigation and dynamic content loading.
--   **UI**:
-    -   Displays a dropdown menu on click: "Unsubscribe", "Delete All", "Unsubscribe + Delete".
-    -   Shows a "Toast" notification at the bottom of the screen for feedback (Success/Error/Undo).
--   **Communication**: Sends messages to `background.js` to perform the actual API calls (logic currently being migrated/connected).
+---
 
-#### 2. Background Script (`background.js`)
--   Handles the OAuth flow and Gmail API requests (similar to the CLI but in JS).
--   Listens for messages from `contentScript.js`.
+## 4. Component: Backend (`/backend`)
+**Purpose**: The logic core. Handles all complex email processing, parsing, and Gmail API calls.
 
-## 5. Configuration
--   **CLI**: Uses `.env` file for settings:
-    -   `MAX_SENDERS`: Limit number of senders to show.
-    -   `MAX_EMAILS_TO_SCAN`: Limit scan depth.
-    -   `DRY_RUN`: Toggle safety mode.
-    -   `MONGODB_URI`: Database connection string.
+### Tech Stack
+-   **Framework**: FastAPI
+-   **Server**: Uvicorn
+-   **Language**: Python 3.10+
+-   **Database**: MongoDB (via PyMongo) - *Optional/Logging*
 
-## 6. Future Roadmap (from `project_systems/PROJECT_PLAN.md`)
--   **Immediate**: Polish the Chrome Extension (Phase 1 & 2).
--   **Features**:
-    -   AI Summaries of sender history.
-    -   "Confidence Score" for mailing lists.
-    -   Daily cleaning tips.
-    -   Better handling of complex unsubscribe flows.
+### Key Modules
+-   **`main.py`**: The FastAPI entry point. Defines API endpoints (e.g., `/auth/login`, `/scan`).
+-   **`auth.py`**: Handles OAuth 2.0 flow, credential validation, and session management.
+-   **`email_fetcher.py`**: Scans Gmail for promotional emails using search queries (`category:promotions`, etc.).
+-   **`unsub_process.py`**: The core "Unsubscribe Engine".
+    -   Parses `List-Unsubscribe` headers.
+    -   Scrapes HTML bodies for "unsubscribe" links.
+    -   Executes specific logic for providers like SendGrid.
+
+---
+
+## 5. Component: Legacy Extension (`/legacy-extension`)
+**Status**: Legacy / Reference.
+**Purpose**: Originally designed to inject an "Unsubscribe" button directly into the Gmail UI.
+**Stack**: Vanilla JS, HTML, CSS, Manifest V3.
+
+---
+
+## 6. Configuration & Setup
+-   **Environment Variables**: Managed via `.env` files in both `frontend/` and `backend/`.
+    -   `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: Vital for OAuth.
+    -   `NEXT_PUBLIC_API_URL`: Frontend pointer to the backend.
+-   **Authentication**: Uses a shared Google Cloud Project configuration.
+
+## 7. Development Protocols
+-   **Git**: Feature branch workflow.
+-   **Run Locally**:
+    -   Backend: `uvicorn main:app --reload` (Port 8000)
+    -   Frontend: `npm run dev` (Port 3000)

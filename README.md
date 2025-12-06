@@ -50,8 +50,7 @@ This monorepo contains the following packages:
 
 -   `frontend/`: The Next.js client-side application.
 -   `backend/`: The FastAPI server and Python logic.
--   `chrome-extension/`: *(Legacy)* An MVP browser extension for inline management.
--   `unclut-cli/`: *(Legacy)* The original command-line interface tool.
+-   `legacy-extension/`: *(Legacy)* An MVP browser extension for inline management.
 
 ---
 
