@@ -21,7 +21,15 @@ app = FastAPI()
 # Add Session Middleware
 # REPLACE 'your-secret-key' with a real secret in .env for production
 SECRET_KEY = os.getenv("SECRET_KEY", "dev_secret_key_change_me")
-app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
+# Configure SessionMiddleware for cross-site usage (Vercel -> Render)
+# same_site='none' is REQUIRED for cross-site cookies.
+# https_only=True is REQUIRED when same_site='none'.
+app.add_middleware(
+    SessionMiddleware, 
+    secret_key=SECRET_KEY, 
+    same_site="none", 
+    https_only=True
+)
 
 origins = [
     "http://localhost:3000",
