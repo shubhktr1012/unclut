@@ -33,11 +33,16 @@ def get_flow(request: Request):
     # if SSL termination happens at the load balancer.
     # Starlette's request.url_for should handle this if configured with ProxyHeadersMiddleware.
     
-    # Determine redirect URI
-    redirect_uri = str(request.url_for('auth_callback'))
-    # Ensure HTTPS in production if not automatic
-    if "onrender.com" in redirect_uri and redirect_uri.startswith("http://"):
-        redirect_uri = redirect_uri.replace("http://", "https://", 1)
+    # 1. Check for explicit override first
+    explicit_redirect_uri = os.getenv("AUTH_REDIRECT_URI")
+    if explicit_redirect_uri:
+        redirect_uri = explicit_redirect_uri
+    else:
+        # 2. Determine base URL from the request fallback
+        redirect_uri = str(request.url_for('auth_callback'))
+        # Ensure HTTPS in production if not automatic
+        if "onrender.com" in redirect_uri and redirect_uri.startswith("http://"):
+            redirect_uri = redirect_uri.replace("http://", "https://", 1)
         
     # Check for credentials in env var first (Production)
     creds_json = os.getenv("GOOGLE_CREDENTIALS_JSON")
