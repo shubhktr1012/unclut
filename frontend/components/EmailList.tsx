@@ -79,6 +79,7 @@ export default function EmailList({ emails: initialEmails }: EmailListProps) {
                 const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include', // <--- IMPORTANT: Send session cookie
                     body: JSON.stringify({ sender_email: sender })
                 });
 
