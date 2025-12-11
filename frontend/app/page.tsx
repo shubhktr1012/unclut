@@ -39,7 +39,7 @@ export default function Home() {
     <main className="min-h-screen bg-white font-sans text-gray-900">
       <Navbar />
       <Hero onScan={scanInbox} loading={loading} />
-      <EmailList emails={emails} />
+      <EmailList emails={emails} onRefill={scanInbox} />
     </main>
   );
 }

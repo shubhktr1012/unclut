@@ -94,6 +94,19 @@ def scan_inbox(max_senders: int = 10, service = Depends(get_current_user_service
 class UnsubscribeRequest(BaseModel):
     sender_email: str
 
+@app.post("/count_emails")
+def count_emails(
+    request: UnsubscribeRequest,
+    service = Depends(get_current_user_service)
+):
+    try:
+        # Use existing utility to find IDs. This is what delete/unsubscribe uses under the hood.
+        # We fetch up to 500 (or some reasonable limit) to give a good estimate or exact count.
+        email_ids = get_message_ids_for_sender(service, request.sender_email, max_results=500)
+        return {"count": len(email_ids), "sender": request.sender_email}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/unsubscribe")
 def unsubscribe_sender(
     request: UnsubscribeRequest, 
