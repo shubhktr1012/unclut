@@ -92,7 +92,8 @@ def save_user(user_info: dict, credentials: dict) -> bool:
         "$setOnInsert": {
             "createdAt": now,
             "unsubs_count": 0,
-            "deleted_count": 0
+            "deleted_count": 0,
+            "hasOnboarded": False  # Default to False for new users
         }
     }
     
@@ -102,6 +103,24 @@ def save_user(user_info: dict, credentials: dict) -> bool:
         return True
     except Exception as e:
         logging.error(f"Failed to save user {email}: {e}")
+        return False
+
+def update_user_onboarding(email: str, status: bool = True) -> bool:
+    """
+    Update the hasOnboarded status for a user.
+    """
+    coll = _get_collection()
+    if coll is None:
+        return False
+        
+    try:
+        coll.update_one(
+            {"_id": email},
+            {"$set": {"hasOnboarded": status, "updatedAt": datetime.now(UTC)}}
+        )
+        return True
+    except Exception as e:
+        logging.error(f"Failed to update onboarding status for {email}: {e}")
         return False
 
 def get_user(email: str) -> dict:

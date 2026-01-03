@@ -15,9 +15,10 @@ interface Email {
 interface EmailListProps {
     emails: Email[];
     onRefill?: () => Promise<void>;
+    onUpdateStats?: () => Promise<any>;
 }
 
-export default function EmailList({ emails: initialEmails, onRefill }: EmailListProps) {
+export default function EmailList({ emails: initialEmails, onRefill, onUpdateStats }: EmailListProps) {
     const [emails, setEmails] = useState<Email[]>(initialEmails);
     const [selected, setSelected] = useState<Set<string>>(new Set());
     const [processing, setProcessing] = useState(false);
@@ -158,6 +159,9 @@ export default function EmailList({ emails: initialEmails, onRefill }: EmailList
                 const newUnsub = new Set(unsubscribedSenders);
                 newUnsub.add(sender_email);
                 setUnsubscribedSenders(newUnsub);
+
+                // Refresh stats
+                if (onUpdateStats) onUpdateStats();
             } else {
                 console.error("Failed to unsubscribe");
                 alert("Failed to unsubscribe. Please try again.");
@@ -199,6 +203,9 @@ export default function EmailList({ emails: initialEmails, onRefill }: EmailList
                     // We need to ensure we sync with that update in the useEffect above.
                     await onRefill();
                 }
+
+                // Refresh stats
+                if (onUpdateStats) onUpdateStats();
             } else {
                 alert("Failed to delete emails.");
             }
@@ -345,6 +352,11 @@ export default function EmailList({ emails: initialEmails, onRefill }: EmailList
             if (failCount === 0) addToast(`Unsubscribed from ${successCount} sender(s)`, 'success');
             else addToast(`Unsubscribe completed with errors`, 'info');
             setSelected(new Set()); // Clear selection
+        }
+
+        // Refresh stats if any success
+        if ((successCount > 0) && onUpdateStats) {
+            onUpdateStats();
         }
 
         setProcessing(false);

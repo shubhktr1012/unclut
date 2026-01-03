@@ -13,3 +13,4 @@ email-validator==2.2.0
 itsdangerous==2.1.2
 pymongo==4.10.1
 pymongo[srv]
+playwright==1.49.1
