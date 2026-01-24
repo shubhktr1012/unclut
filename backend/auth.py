@@ -58,17 +58,39 @@ def get_frontend_url(request_host: str = None):
     return "http://localhost:3000"
 
 def create_flow(redirect_uri=None):
-    if not os.path.exists(CLIENT_SECRETS_FILE):
-        raise FileNotFoundError(f"Client secrets file not found at {CLIENT_SECRETS_FILE}")
-    
     # Use the passed URI or fall back to default logic
     uri = redirect_uri or get_redirect_uri()
+
+    # Priority 1: Check for credentials.json file (Local dev)
+    if os.path.exists(CLIENT_SECRETS_FILE):
+        return Flow.from_client_secrets_file(
+            CLIENT_SECRETS_FILE,
+            scopes=SCOPES,
+            redirect_uri=uri
+        )
     
-    return Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE,
-        scopes=SCOPES,
-        redirect_uri=uri
-    )
+    # Priority 2: Check for Environment Variables (Production / Render)
+    client_id = os.getenv("GOOGLE_CLIENT_ID")
+    client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+    
+    if client_id and client_secret:
+        client_config = {
+            "web": {
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            }
+        }
+        return Flow.from_client_config(
+            client_config,
+            scopes=SCOPES,
+            redirect_uri=uri
+        )
+
+    # If neither attempts work, raise error
+    raise FileNotFoundError(f"Client secrets file not found at {CLIENT_SECRETS_FILE} and GOOGLE_CLIENT_ID/SECRET env vars are missing.")
 
 @router.get("/login")
 def login(request: Request):
